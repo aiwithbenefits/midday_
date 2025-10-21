@@ -9,6 +9,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { options } from "./data";
 
 type Props = {
@@ -18,8 +19,27 @@ type Props = {
 
 export function SpendingPeriod({ period, onChange }: Props) {
   const t = useI18n();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const selectedPeriod = options.find((option) => option.id === period);
+
+  if (!mounted) {
+    return (
+      <div className="flex justify-between">
+        <div>
+          <h2 className="text-lg">Spending</h2>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span>&nbsp;</span>
+          <Icons.ChevronDown />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-between">

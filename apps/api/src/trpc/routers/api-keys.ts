@@ -37,7 +37,7 @@ export const apiKeysRouter = createTRPCRouter({
             to: session.user.email!,
             subject: "New API Key Created",
             react: ApiKeyCreatedEmail({
-              fullName: session.user.full_name!,
+              fullName: session.user.full_name || session.user.email || 'Local Admin',
               keyName: input.name,
               createdAt: data.createdAt,
               email: session.user.email!,

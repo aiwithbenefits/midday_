@@ -11,7 +11,7 @@ export const institutionsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getInstitutionsSchema)
     .query(async ({ input }) => {
-      const institutionsResponse = await client.institutions.$get({
+      const institutionsResponse = await (client as any).institutions.$get({
         query: input,
       });
 
@@ -19,9 +19,9 @@ export const institutionsRouter = createTRPCRouter({
         throw new Error("Failed to get institutions");
       }
 
-      const { data } = await institutionsResponse.json();
+      const { data } = (await institutionsResponse.json()) as any;
 
-      return data.map((institution) => ({
+      return (data as any[]).map((institution: any) => ({
         ...institution,
         availableHistory: institution.available_history,
         maximumConsentValidity: institution.maximum_consent_validity,
@@ -34,7 +34,7 @@ export const institutionsRouter = createTRPCRouter({
     .input(getAccountsSchema)
     .query(async ({ input }) => {
       try {
-        const accountsResponse = await client.accounts.$get({
+        const accountsResponse = await (client as any).accounts.$get({
           query: input,
         });
 
@@ -42,9 +42,9 @@ export const institutionsRouter = createTRPCRouter({
           throw new Error("Failed to get accounts");
         }
 
-        const { data } = await accountsResponse.json();
+        const { data } = (await accountsResponse.json()) as any;
 
-        return data.sort((a, b) => b.balance.amount - a.balance.amount);
+        return (data as any[]).sort((a: any, b: any) => b.balance.amount - a.balance.amount);
       } catch (error) {
         console.log(error);
         throw new TRPCError({
@@ -57,7 +57,7 @@ export const institutionsRouter = createTRPCRouter({
   updateUsage: protectedProcedure
     .input(updateUsageSchema)
     .mutation(async ({ input }) => {
-      const usageResponse = await client.institutions[":id"].usage.$put({
+      const usageResponse = await (client as any).institutions[":id"].usage.$put({
         param: input,
       });
 
@@ -65,6 +65,6 @@ export const institutionsRouter = createTRPCRouter({
         throw new Error("Failed to update institution usage");
       }
 
-      return usageResponse.json();
+      return (usageResponse.json() as unknown) as any;
     }),
 });

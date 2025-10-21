@@ -13,11 +13,12 @@ export function EmptyState() {
     }),
   );
 
-  const isEmpty = !accounts?.length;
-
-  if (!isEmpty) {
-    return null;
-  }
+  // Disabled for self-hosted - no bank connections required
+  // const isEmpty = !accounts?.length;
+  // if (!isEmpty) {
+  //   return null;
+  // }
+  return null; // Always hide empty state
 
   return (
     <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center z-20">

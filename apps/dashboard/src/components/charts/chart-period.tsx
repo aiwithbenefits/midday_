@@ -20,6 +20,7 @@ import {
 import { formatISO } from "date-fns";
 import { formatDateRange } from "little-date";
 import type { DateRange } from "react-day-picker";
+import { useState, useEffect } from "react";
 
 type Props = {
   disabled?: string;
@@ -28,6 +29,11 @@ type Props = {
 export function ChartPeriod({ disabled }: Props) {
   const { params, setParams } = useReportsParams();
   const { data: user } = useUserQuery();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChangePeriod = (
     range: DateRange | undefined,
@@ -46,10 +52,17 @@ export function ChartPeriod({ disabled }: Props) {
     setParams(newRange);
   };
 
-  // Handle calendar selection separately to match the expected type
   const handleCalendarSelect = (selectedRange: DateRange | undefined) => {
     handleChangePeriod(selectedRange);
   };
+
+  const displayDateRange = !mounted
+    ? ""
+    : params.from && params.to
+    ? formatDateRange(new Date(params.from), new Date(params.to), {
+        includeTime: false,
+      })
+    : "Select date range";
 
   return (
     <div className="flex space-x-4">
@@ -60,11 +73,7 @@ export function ChartPeriod({ disabled }: Props) {
             className="justify-start text-left font-medium space-x-2"
           >
             <span className="line-clamp-1 text-ellipsis">
-              {params.from && params.to
-                ? formatDateRange(new Date(params.from), new Date(params.to), {
-                    includeTime: false,
-                  })
-                : "Select date range"}
+              {displayDateRange || <span>&nbsp;</span>}
             </span>
             <Icons.ChevronDown />
           </Button>

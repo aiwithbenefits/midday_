@@ -54,14 +54,15 @@ export const authActionClient = actionClientWithMeta
     return result;
   })
   .use(async ({ next, metadata }) => {
-    const queryClient = getQueryClient();
-    const user = await queryClient.fetchQuery(trpc.user.me.queryOptions());
+    // Self-hosted: Create fake user instead of fetching from database
+    const user = {
+      id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      email: 'admin@local.dev',
+      fullName: 'Admin User',
+      teamId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    };
 
     const supabase = await createClient();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
 
     const analytics = await setupAnalytics({
       userId: user.id,

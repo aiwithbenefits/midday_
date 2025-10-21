@@ -45,10 +45,10 @@ export function OverviewModal({ hideConnectFlow: hasHideConnectFlow }: Props) {
   };
 
   useEffect(() => {
-    // If the user has not connected any accounts and the modal is defaultOpen, open the modal
-    if (!accounts?.length && !hasHideConnectFlow) {
-      setIsOpen(true);
-    }
+    // Disabled for self-hosted - no bank connections needed
+    // if (!accounts?.length && !hasHideConnectFlow) {
+    //   setIsOpen(true);
+    // }
   }, [accounts, hasHideConnectFlow]);
 
   return (

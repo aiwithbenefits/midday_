@@ -15,6 +15,7 @@ import {
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  calculateInboxSuggestions,
   confirmSuggestedMatch,
   createInbox,
   declineSuggestedMatch,
@@ -178,12 +179,23 @@ export const inboxRouter = createTRPCRouter({
   // Retry matching for an inbox item
   retryMatching: protectedProcedure
     .input(retryMatchingSchema)
-    .mutation(async ({ ctx: { teamId }, input }) => {
-      const result = await tasks.trigger("batch-process-matching", {
-        teamId: teamId!,
-        inboxIds: [input.id],
-      });
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      // Self-hosted fallback: run matching synchronously if background worker is unavailable
+      try {
+        await calculateInboxSuggestions(db, {
+          teamId: teamId!,
+          inboxId: input.id,
+        });
 
-      return { jobId: result.id };
+        // Keep response shape compatible
+        return { jobId: "local" };
+      } catch (error) {
+        // Best-effort fallback to background task if available
+        const result = await tasks.trigger("batch-process-matching", {
+          teamId: teamId!,
+          inboxIds: [input.id],
+        });
+        return { jobId: result.id };
+      }
     }),
 });

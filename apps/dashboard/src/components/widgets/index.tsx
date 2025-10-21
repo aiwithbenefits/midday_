@@ -29,8 +29,9 @@ export function Widgets() {
     }),
   );
 
-  // If the user has not connected any accounts, disable the widgets
-  const disabled = !accounts?.length;
+  // Disabled for self-hosted - no bank connections required
+  // Allow all widgets to function even without bank accounts
+  const disabled = false;
 
   const items = [
     <Assistant key="assistant" />,

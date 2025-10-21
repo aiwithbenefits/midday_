@@ -27,14 +27,10 @@ export const withTeamPermission = async <TReturn>(opts: {
     });
   }
 
+  // Self-hosted mode: Just get the user's team_id without permission checks
   const result = await ctx.db.query.users.findFirst({
-    with: {
-      usersOnTeams: {
-        columns: {
-          id: true,
-          teamId: true,
-        },
-      },
+    columns: {
+      teamId: true,
     },
     where: (users, { eq }) => eq(users.id, userId),
   });
@@ -48,27 +44,7 @@ export const withTeamPermission = async <TReturn>(opts: {
 
   const teamId = result.teamId;
 
-  // If teamId is null, user has no team assigned but this is now allowed
-  if (teamId !== null) {
-    const cacheKey = `user:${userId}:team:${teamId}`;
-    let hasAccess = await teamCache.get(cacheKey);
-
-    if (hasAccess === undefined) {
-      hasAccess = result.usersOnTeams.some(
-        (membership) => membership.teamId === teamId,
-      );
-
-      await teamCache.set(cacheKey, hasAccess);
-    }
-
-    if (!hasAccess) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "No permission to access this team",
-      });
-    }
-  }
-
+  // Self-hosted: Always allow access for authenticated users
   return next({
     ctx: {
       session: ctx.session,

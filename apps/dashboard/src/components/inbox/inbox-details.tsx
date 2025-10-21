@@ -396,7 +396,7 @@ export function InboxDetails() {
           {data?.filePath && (
             <FileViewer
               mimeType={data.contentType}
-              url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
+              url={`/api/proxy?filePath=${data?.filePath.join("/")}`}
               // If the order changes, the file viewer will remount otherwise the PDF worker will crash
               key={`${params.order}-${JSON.stringify(filterParams)}`}
             />

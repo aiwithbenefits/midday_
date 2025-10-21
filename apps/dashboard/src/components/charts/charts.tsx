@@ -18,8 +18,9 @@ export function Charts() {
     }),
   );
 
-  // If the user has not connected any accounts, disable the charts
-  const disabled = !accounts?.length;
+  // Disabled for self-hosted - no bank connections required
+  // Allow all charts to function even without bank accounts
+  const disabled = false;
 
   switch (params.chart) {
     case "revenue":

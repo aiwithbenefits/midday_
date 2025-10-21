@@ -1,7 +1,7 @@
 "use client";
 
 import { useAssistantStore } from "@/store/assistant";
-import { Dialog, DialogContent } from "@midday/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, VisuallyHidden } from "@midday/ui/dialog";
 import { Assistant } from ".";
 
 export function AssistantModal() {
@@ -15,6 +15,9 @@ export function AssistantModal() {
         className="overflow-hidden p-0 max-w-full w-full h-full md:max-w-[740px] md:h-[480px] m-0 select-text"
         hideClose
       >
+        <VisuallyHidden>
+          <DialogTitle>Assistant</DialogTitle>
+        </VisuallyHidden>
         <Assistant />
       </DialogContent>
     </Dialog>

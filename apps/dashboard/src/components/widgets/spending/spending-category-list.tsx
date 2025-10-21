@@ -10,6 +10,7 @@ import {
 import { Progress } from "@midday/ui/progress";
 import { formatISO } from "date-fns";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { SpendingCategoryItem } from "./spending-category-item";
 
 type Props = {
@@ -26,6 +27,34 @@ export function SpendingCategoryList({
   selectedPeriod,
   disabled,
 }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <ul className="mt-8 space-y-4 overflow-auto scrollbar-hide aspect-square pb-14">
+        {data?.map((category) => (
+          <li key={category.slug}>
+            <div className="flex items-center">
+              <Category
+                name={category.name}
+                color={category.color}
+                className="text-sm text-primary space-x-3 w-[90%]"
+              />
+              <Progress
+                className="w-full rounded-none h-[6px]"
+                value={category.percentage}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <ul className="mt-8 space-y-4 overflow-auto scrollbar-hide aspect-square pb-14">
       {data?.map((category) => {

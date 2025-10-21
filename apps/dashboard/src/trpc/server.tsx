@@ -26,14 +26,9 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
         url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
         transformer: superjson,
         async headers() {
-          const supabase = await createClient();
-
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-
+          // Self-hosted: Always use fake session token
           return {
-            Authorization: `Bearer ${session?.access_token}`,
+            Authorization: `Bearer fake-token-self-hosted`,
             "x-user-timezone": await getTimezone(),
             "x-user-locale": await getLocale(),
             "x-user-country": await getCountryCode(),

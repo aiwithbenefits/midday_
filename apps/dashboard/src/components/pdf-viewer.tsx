@@ -17,6 +17,8 @@ interface PdfViewerProps {
 }
 
 export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
+  console.log(`PdfViewer rendering with URL: ${url}`);
+  
   const [numPages, setNumPages] = useState<number>();
   const [isPasswordProtected, setIsPasswordProtected] = useState(false);
   const [passwordCancelled, setPasswordCancelled] = useState(false);
@@ -42,6 +44,13 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
   }
 
   function onDocumentLoadError(error: Error): void {
+    console.error("PDF Load Error Details:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      url: url
+    });
+    
     // Check if it's a password-related error
     const errorMessage = error.message.toLowerCase();
     if (
@@ -50,6 +59,7 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
     ) {
       setIsPasswordProtected(true);
     }
+    // For other errors (invalid PDF, corrupted, etc.), the Document component's error prop will handle display
   }
 
   function onPassword(
@@ -179,14 +189,20 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
               onLoadSuccess={onDocumentLoadSuccess}
               onLoadError={onDocumentLoadError}
               onPassword={onPassword}
+              options={{
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts`,
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                cMapPacked: true,
+              }}
               loading={
                 <Skeleton className="w-full h-[calc(100vh-theme(spacing.24))]" />
               }
               error={
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Failed to load PDF. The file may be corrupted or
-                    unsupported.
+                <div className="flex flex-col items-center justify-center p-8 text-center gap-2">
+                  <p className="text-sm font-medium">Unable to display PDF</p>
+                  <p className="text-xs text-muted-foreground max-w-md">
+                    The file may be corrupted, have an invalid PDF structure, or be a different file type. 
+                    Please verify the file is a valid PDF document.
                   </p>
                 </div>
               }

@@ -1,0 +1,722 @@
+# Invoices
+(*invoices*)
+
+## Overview
+
+### Available Operations
+
+* [list](#list) - List all invoices
+* [create](#create) - Create an invoice
+* [getInvoicesPaymentStatus](#getinvoicespaymentstatus) - Payment status
+* [summary](#summary) - Invoice summary
+* [get](#get) - Retrieve a invoice
+* [update](#update) - Update an invoice
+* [delete](#delete) - Delete a invoice
+
+## list
+
+Retrieve a list of invoices for the authenticated team.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="listInvoices" method="get" path="/invoices" -->
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await midday.invoices.list({
+    cursor: "25",
+    sort: [
+      "createdAt",
+      "desc",
+    ],
+    pageSize: 25,
+    q: "Acme",
+    start: "2024-01-01",
+    end: "2024-01-31",
+    statuses: [
+      "paid",
+      "unpaid",
+    ],
+    customers: [
+      "customer-uuid-1",
+      "customer-uuid-2",
+    ],
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { MiddayCore } from "@midday-ai/sdk/core.js";
+import { invoicesList } from "@midday-ai/sdk/funcs/invoicesList.js";
+
+// Use `MiddayCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const midday = new MiddayCore({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await invoicesList(midday, {
+    cursor: "25",
+    sort: [
+      "createdAt",
+      "desc",
+    ],
+    pageSize: 25,
+    q: "Acme",
+    start: "2024-01-01",
+    end: "2024-01-31",
+    statuses: [
+      "paid",
+      "unpaid",
+    ],
+    customers: [
+      "customer-uuid-1",
+      "customer-uuid-2",
+    ],
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("invoicesList failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.ListInvoicesRequest](../../models/operations/listinvoicesrequest.md)                                                                                               | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.ListInvoicesResponse](../../models/operations/listinvoicesresponse.md)\>**
+
+### Errors
+
+| Error Type      | Status Code     | Content Type    |
+| --------------- | --------------- | --------------- |
+| errors.APIError | 4XX, 5XX        | \*/\*           |
+
+## create
+
+Create an invoice for the authenticated team. The behavior depends on deliveryType: 'create' generates and finalizes the invoice immediately, 'create_and_send' also sends it to the customer, 'scheduled' schedules the invoice for automatic processing at the specified date.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="createInvoice" method="post" path="/invoices" -->
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await midday.invoices.create({
+    template: {
+      customerLabel: "Bill To",
+      title: "Invoice",
+      fromLabel: "From",
+      invoiceNoLabel: "Invoice #",
+      issueDateLabel: "Issue Date",
+      dueDateLabel: "Due Date",
+      descriptionLabel: "Description",
+      priceLabel: "Rate",
+      quantityLabel: "Qty",
+      totalLabel: "Amount",
+      totalSummaryLabel: "Total",
+      vatLabel: "VAT",
+      taxLabel: "Sales Tax",
+      discountLabel: "Discount",
+      timezone: "America/Los_Angeles",
+      paymentLabel: "Payment Information",
+      noteLabel: "Notes",
+      logoUrl: "https://example.com/logo.png",
+      currency: "USD",
+      dateFormat: "MM/dd/yyyy",
+      includeVat: false,
+      includeTax: true,
+      includeDiscount: false,
+      includeDecimals: true,
+      includePdf: true,
+      sendCopy: true,
+      includeUnits: true,
+      includeQr: false,
+      taxRate: 8.5,
+      vatRate: 0,
+      size: "letter",
+      deliveryType: "create",
+      locale: "en-US",
+      paymentDetails: {},
+      fromDetails: {},
+    },
+    fromDetails: {},
+    customerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    paymentDetails: {},
+    noteDetails: {},
+    dueDate: "2024-07-15T23:59:59.000Z",
+    issueDate: "2024-06-15T00:00:00.000Z",
+    invoiceNumber: "INV-2024-001",
+    logoUrl: "https://example.com/logo.png",
+    tax: 85,
+    topBlock: {},
+    bottomBlock: {},
+    amount: 1085,
+    lineItems: [
+      {
+        quantity: 40,
+        price: 75,
+        tax: 8.5,
+        name: {},
+      },
+      {
+        quantity: 20,
+        price: 50,
+        tax: 8.5,
+        name: {},
+      },
+    ],
+    deliveryType: "create",
+    scheduledAt: new Date("2024-07-01T09:00:00.000Z"),
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { MiddayCore } from "@midday-ai/sdk/core.js";
+import { invoicesCreate } from "@midday-ai/sdk/funcs/invoicesCreate.js";
+
+// Use `MiddayCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const midday = new MiddayCore({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await invoicesCreate(midday, {
+    template: {
+      customerLabel: "Bill To",
+      title: "Invoice",
+      fromLabel: "From",
+      invoiceNoLabel: "Invoice #",
+      issueDateLabel: "Issue Date",
+      dueDateLabel: "Due Date",
+      descriptionLabel: "Description",
+      priceLabel: "Rate",
+      quantityLabel: "Qty",
+      totalLabel: "Amount",
+      totalSummaryLabel: "Total",
+      vatLabel: "VAT",
+      taxLabel: "Sales Tax",
+      discountLabel: "Discount",
+      timezone: "America/Los_Angeles",
+      paymentLabel: "Payment Information",
+      noteLabel: "Notes",
+      logoUrl: "https://example.com/logo.png",
+      currency: "USD",
+      dateFormat: "MM/dd/yyyy",
+      includeVat: false,
+      includeTax: true,
+      includeDiscount: false,
+      includeDecimals: true,
+      includePdf: true,
+      sendCopy: true,
+      includeUnits: true,
+      includeQr: false,
+      taxRate: 8.5,
+      vatRate: 0,
+      size: "letter",
+      deliveryType: "create",
+      locale: "en-US",
+      paymentDetails: {},
+      fromDetails: {},
+    },
+    fromDetails: {},
+    customerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    paymentDetails: {},
+    noteDetails: {},
+    dueDate: "2024-07-15T23:59:59.000Z",
+    issueDate: "2024-06-15T00:00:00.000Z",
+    invoiceNumber: "INV-2024-001",
+    logoUrl: "https://example.com/logo.png",
+    tax: 85,
+    topBlock: {},
+    bottomBlock: {},
+    amount: 1085,
+    lineItems: [
+      {
+        quantity: 40,
+        price: 75,
+        tax: 8.5,
+        name: {},
+      },
+      {
+        quantity: 20,
+        price: 50,
+        tax: 8.5,
+        name: {},
+      },
+    ],
+    deliveryType: "create",
+    scheduledAt: new Date("2024-07-01T09:00:00.000Z"),
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("invoicesCreate failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.CreateInvoiceRequest](../../models/operations/createinvoicerequest.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.CreateInvoiceResponse](../../models/operations/createinvoiceresponse.md)\>**
+
+### Errors
+
+| Error Type                              | Status Code                             | Content Type                            |
+| --------------------------------------- | --------------------------------------- | --------------------------------------- |
+| errors.CreateInvoiceBadRequestError     | 400                                     | application/json                        |
+| errors.CreateInvoiceNotFoundError       | 404                                     | application/json                        |
+| errors.ConflictError                    | 409                                     | application/json                        |
+| errors.CreateInvoiceInternalServerError | 500                                     | application/json                        |
+| errors.APIError                         | 4XX, 5XX                                | \*/\*                                   |
+
+## getInvoicesPaymentStatus
+
+Get payment status for the authenticated team.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="get_/invoices/payment-status" method="get" path="/invoices/payment-status" -->
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await midday.invoices.getInvoicesPaymentStatus();
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { MiddayCore } from "@midday-ai/sdk/core.js";
+import { invoicesGetInvoicesPaymentStatus } from "@midday-ai/sdk/funcs/invoicesGetInvoicesPaymentStatus.js";
+
+// Use `MiddayCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const midday = new MiddayCore({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await invoicesGetInvoicesPaymentStatus(midday);
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("invoicesGetInvoicesPaymentStatus failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.GetInvoicesPaymentStatusResponse](../../models/operations/getinvoicespaymentstatusresponse.md)\>**
+
+### Errors
+
+| Error Type      | Status Code     | Content Type    |
+| --------------- | --------------- | --------------- |
+| errors.APIError | 4XX, 5XX        | \*/\*           |
+
+## summary
+
+Get summary of invoices for the authenticated team.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="getInvoiceSummary" method="get" path="/invoices/summary" -->
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await midday.invoices.summary({
+    status: "paid",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { MiddayCore } from "@midday-ai/sdk/core.js";
+import { invoicesSummary } from "@midday-ai/sdk/funcs/invoicesSummary.js";
+
+// Use `MiddayCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const midday = new MiddayCore({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await invoicesSummary(midday, {
+    status: "paid",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("invoicesSummary failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.GetInvoiceSummaryRequest](../../models/operations/getinvoicesummaryrequest.md)                                                                                     | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.GetInvoiceSummaryResponse[]](../../models/.md)\>**
+
+### Errors
+
+| Error Type      | Status Code     | Content Type    |
+| --------------- | --------------- | --------------- |
+| errors.APIError | 4XX, 5XX        | \*/\*           |
+
+## get
+
+Retrieve a invoice by its unique identifier for the authenticated team.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="getInvoiceById" method="get" path="/invoices/{id}" -->
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await midday.invoices.get({
+    id: "<id>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { MiddayCore } from "@midday-ai/sdk/core.js";
+import { invoicesGet } from "@midday-ai/sdk/funcs/invoicesGet.js";
+
+// Use `MiddayCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const midday = new MiddayCore({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await invoicesGet(midday, {
+    id: "<id>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("invoicesGet failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.GetInvoiceByIdRequest](../../models/operations/getinvoicebyidrequest.md)                                                                                           | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.GetInvoiceByIdResponse](../../models/operations/getinvoicebyidresponse.md)\>**
+
+### Errors
+
+| Error Type      | Status Code     | Content Type    |
+| --------------- | --------------- | --------------- |
+| errors.APIError | 4XX, 5XX        | \*/\*           |
+
+## update
+
+Update an invoice by its unique identifier for the authenticated team.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="updateInvoice" method="put" path="/invoices/{id}" -->
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await midday.invoices.update({
+    id: "<id>",
+    requestBody: {
+      status: "paid",
+      paidAt: new Date("2024-06-15T12:00:00.000Z"),
+      internalNote: "Payment received via bank transfer",
+    },
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { MiddayCore } from "@midday-ai/sdk/core.js";
+import { invoicesUpdate } from "@midday-ai/sdk/funcs/invoicesUpdate.js";
+
+// Use `MiddayCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const midday = new MiddayCore({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await invoicesUpdate(midday, {
+    id: "<id>",
+    requestBody: {
+      status: "paid",
+      paidAt: new Date("2024-06-15T12:00:00.000Z"),
+      internalNote: "Payment received via bank transfer",
+    },
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("invoicesUpdate failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.UpdateInvoiceRequest](../../models/operations/updateinvoicerequest.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.UpdateInvoiceResponse](../../models/operations/updateinvoiceresponse.md)\>**
+
+### Errors
+
+| Error Type      | Status Code     | Content Type    |
+| --------------- | --------------- | --------------- |
+| errors.APIError | 4XX, 5XX        | \*/\*           |
+
+## delete
+
+Delete an invoice by its unique identifier for the authenticated team. Only invoices with status 'draft' or 'canceled' can be deleted directly. If the invoice is not in one of these statuses, update its status to 'canceled' before attempting deletion.
+
+### Example Usage
+
+<!-- UsageSnippet language="typescript" operationID="deleteInvoice" method="delete" path="/invoices/{id}" -->
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const result = await midday.invoices.delete({
+    id: "<id>",
+  });
+
+  console.log(result);
+}
+
+run();
+```
+
+### Standalone function
+
+The standalone function version of this method:
+
+```typescript
+import { MiddayCore } from "@midday-ai/sdk/core.js";
+import { invoicesDelete } from "@midday-ai/sdk/funcs/invoicesDelete.js";
+
+// Use `MiddayCore` for best tree-shaking performance.
+// You can create one instance of it to use across an application.
+const midday = new MiddayCore({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
+});
+
+async function run() {
+  const res = await invoicesDelete(midday, {
+    id: "<id>",
+  });
+  if (res.ok) {
+    const { value: result } = res;
+    console.log(result);
+  } else {
+    console.log("invoicesDelete failed:", res.error);
+  }
+}
+
+run();
+```
+
+### Parameters
+
+| Parameter                                                                                                                                                                      | Type                                                                                                                                                                           | Required                                                                                                                                                                       | Description                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `request`                                                                                                                                                                      | [operations.DeleteInvoiceRequest](../../models/operations/deleteinvoicerequest.md)                                                                                             | :heavy_check_mark:                                                                                                                                                             | The request object to use for the request.                                                                                                                                     |
+| `options`                                                                                                                                                                      | RequestOptions                                                                                                                                                                 | :heavy_minus_sign:                                                                                                                                                             | Used to set various options for making HTTP requests.                                                                                                                          |
+| `options.fetchOptions`                                                                                                                                                         | [RequestInit](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request#options)                                                                                        | :heavy_minus_sign:                                                                                                                                                             | Options that are passed to the underlying HTTP request. This can be used to inject extra headers for examples. All `Request` options, except `method` and `body`, are allowed. |
+| `options.retries`                                                                                                                                                              | [RetryConfig](../../lib/utils/retryconfig.md)                                                                                                                                  | :heavy_minus_sign:                                                                                                                                                             | Enables retrying HTTP requests under certain failure conditions.                                                                                                               |
+
+### Response
+
+**Promise\<[operations.DeleteInvoiceResponse](../../models/operations/deleteinvoiceresponse.md)\>**
+
+### Errors
+
+| Error Type      | Status Code     | Content Type    |
+| --------------- | --------------- | --------------- |
+| errors.APIError | 4XX, 5XX        | \*/\*           |

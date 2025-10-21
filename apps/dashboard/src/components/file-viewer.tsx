@@ -21,11 +21,19 @@ type Props = {
 };
 
 export function FileViewer({ mimeType, url, maxWidth }: Props) {
-  if (
-    mimeType === "application/pdf" ||
-    mimeType === "application/octet-stream"
-  ) {
+  // Only show PDF viewer for confirmed PDF mime types
+  if (mimeType === "application/pdf") {
     return <DynamicPdfViewer url={url} key={url} maxWidth={maxWidth} />;
+  }
+
+  // For octet-stream, check file extension as fallback
+  if (mimeType === "application/octet-stream") {
+    const urlPath = new URL(url, window.location.origin).pathname;
+    const extension = urlPath.split('.').pop()?.toLowerCase();
+    
+    if (extension === "pdf") {
+      return <DynamicPdfViewer url={url} key={url} maxWidth={maxWidth} />;
+    }
   }
 
   if (mimeType?.startsWith("image/")) {

@@ -218,7 +218,7 @@ export const teamRouter = createTRPCRouter({
       const invites = results.map((invite) => ({
         email: invite?.email!,
         invitedBy: session.user.id!,
-        invitedByName: session.user.full_name!,
+        invitedByName: session.user.full_name || 'Local Admin',
         invitedByEmail: session.user.email!,
         teamName: invite?.team?.name!,
         inviteCode: invite?.code!,

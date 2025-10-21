@@ -9,7 +9,6 @@ import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
-import { withTeamPermission } from "./middleware/team-permission";
 
 type TRPCContext = {
   session: Session | null;
@@ -53,29 +52,27 @@ const withPrimaryDbMiddleware = t.middleware(async (opts) => {
   });
 });
 
-const withTeamPermissionMiddleware = t.middleware(async (opts) => {
-  return withTeamPermission({
-    ctx: opts.ctx,
-    next: opts.next,
-  });
-});
-
 export const publicProcedure = t.procedure.use(withPrimaryDbMiddleware);
 
+// Self-hosted: No authentication required - all procedures are public
 export const protectedProcedure = t.procedure
-  .use(withTeamPermissionMiddleware) // NOTE: This is needed to ensure that the teamId is set in the context
   .use(withPrimaryDbMiddleware)
   .use(async (opts) => {
-    const { teamId, session } = opts.ctx;
+    // Self-hosted: Hardcoded session and team - no database queries
+    const fakeSession = {
+      user: {
+        id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        email: 'admin@local.dev',
+        full_name: 'Local Admin',
+      },
+    };
 
-    if (!session) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
+    const teamId = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
     return opts.next({
       ctx: {
         teamId,
-        session,
+        session: fakeSession,
       },
     });
   });
